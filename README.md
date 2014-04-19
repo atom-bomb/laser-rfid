@@ -36,9 +36,14 @@ teensy configuration:
 ---------------------
 
 the LCD panel is connected to teensy pins 12, 13, 14, 15, 21 and 20
+
 the Laser Firing input signal is comnected to teensy pin 0
+
 the Laser Enable relay is connected to teensy pin 16
+
 the Laser Ready input signal is connected to teensy pin 17
+
 the ID12LA RFID reader is connected to RX pin of the teensy UART
+
 the teensy is connected to the TP-Link router via USB and shows up as a serial
 device at /dev/ttyACM0
