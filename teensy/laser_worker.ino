@@ -26,6 +26,9 @@
 // 5v from laser power supply
 #define LASER_POWER_PIN 17
 
+// Switch to enable Costa mode
+#define COSTA_PIN 18
+
 #define RFID_CODE_LENGTH 10
 #define RFID_CODE_START 0x02
 #define RFID_CODE_END 0x03
@@ -59,6 +62,9 @@ void setup() {
   pinMode(LASER_POWER_PIN, INPUT);
   digitalWrite(LASER_POWER_PIN, HIGH);
   
+  pinMode(COSTA_PIN, INPUT);
+  digitalWrite(COSTA_PIN, HIGH);
+  
   pinMode(RESET_PIN, INPUT);
   digitalWrite(RESET_PIN, HIGH);
   
@@ -82,6 +88,22 @@ void loop() {
   static unsigned char serialDisplayBuffer[MAX_DISPLAY_WIDTH + 1];
   static unsigned char serialDisplayBufferIndex = 0;
   unsigned char serialByte;
+  
+  static unsigned char costa = 0;
+  
+  if ((costa == 0) &&
+      (digitalRead(COSTA_PIN) == 1)) {
+    costa = 1;
+    digitalWrite(ENABLE_PIN, HIGH);
+    lcd.setCursor(0, 0);
+    lcd.print("  Hello Costa   ");
+  } else if ((costa == 1) &&
+      (digitalRead(COSTA_PIN) == 0)) {
+    costa = 0;
+    digitalWrite(ENABLE_PIN, LOW);
+    lcd.setCursor(0, 0);
+    lcd.print("  Seeya Costa   ");
+  }
   
   if (Serial.available() > 0) {
     serialByte = Serial.read();

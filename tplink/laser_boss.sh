@@ -62,7 +62,20 @@ display() {
 }
 
 disable_laser
-display "  Present Key"
+
+if [ ! -f /var/state/ntp_ok ]; then
+  display "   Waiting for NTP"
+  ntpd -n -q -p 0.openwrt.pool.ntp.org -p 1.openwrt.pool.ntp.org -p 2.openwrt.pool.ntp.org -p 3.openwrt.pool.ntp.org
+  if [ $? == 0 ]; then
+    touch /var/state/ntp_ok
+  fi
+fi
+
+while [ ! -f /var/state/ntp_ok ]; do
+  sleep 1
+done
+
+display "   Present Key"
 
 DATA=.
 while [ "$DATA" != "exit" ]
@@ -87,7 +100,7 @@ do
         CURRENT_RFID=
         display "  Logged Out"
         sleep ${MSG_DELAY}
-        display "  Present Key"
+        display "   Present Key"
       else
         display "      Wait"
         RESPONSE=`laser_login ${NEW_RFID} ${CURRENT_ODOMETER}`
@@ -114,7 +127,7 @@ do
             display "${RESPONSE##*|}"
           fi
           sleep ${MSG_DELAY} 
-          display "  Present Key"
+          display "   Present Key"
         fi
       fi
     fi
