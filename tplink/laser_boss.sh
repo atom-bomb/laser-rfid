@@ -4,7 +4,10 @@ API_URL=https://ssl.acemonstertoys.org/laser/api.php
 API_KEY=mYsEcReTkEy
 
 ODOMETER_PORT=/dev/ttyACM0
+ODOMETER_USB_DEVICE=usb1
 #ODOMETER_PORT=/dev/tty
+ODOMETER_READ_TIMEOUT=5
+USB_RESET_HACK_TIMEOUT=1
 
 stty -F ${ODOMETER_PORT} raw speed 9600
 
@@ -61,6 +64,18 @@ display() {
   echo "p"$1 > ${ODOMETER_PORT}
 }
 
+# try to get a response from the teensy
+# reset USB if there is no response
+usb_reset_hack() {
+  echo "o" > ${ODOMETER_PORT}
+  read -t ${USB_RESET_HACK_TIMEOUT} DATA < ${ODOMETER_PORT}
+  if [ "$?" -gt "0" ]; then
+    #echo "Resetting USB..."
+    echo 0 > /sys/bus/usb/devices/${ODOMETER_USB_DEVICE}/authorized
+    echo 1 > /sys/bus/usb/devices/${ODOMETER_USB_DEVICE}/authorized
+  fi
+}
+
 disable_laser
 
 if [ ! -f /var/state/ntp_ok ]; then
@@ -80,7 +95,8 @@ display "   Present Key"
 DATA=.
 while [ "$DATA" != "exit" ]
 do
-  read DATA < ${ODOMETER_PORT}
+  usb_reset_hack
+  read -t ${ODOMETER_READ_TIMEOUT} DATA < ${ODOMETER_PORT}
 
   if [ "$DATA" != "" ]; then
     if [ "${DATA:0:1}" == "o" ]; then
